@@ -5,6 +5,7 @@ from rest_framework.generics import DestroyAPIView
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 import redis
 import hashlib
 from datetime import datetime, timedelta, timezone
@@ -17,7 +18,6 @@ class UserPostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
 
     def create(self, request, user_id):
-        request.data['user_id'] = user_id
         return super().create(request)
 
     def get_queryset(self):
@@ -41,8 +41,9 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         post = get_object_or_404(self.queryset, pk=kwargs['post_id'])
-        request.data['user_id'] = post.user_id
-        serializer = self.get_serializer(post, data=request.data)
+        mutable_data = request.data.copy()
+        mutable_data['user_id'] = post.user_id
+        serializer = self.get_serializer(post, data=mutable_data)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         cache_key = hashlib.sha256((f"Post# {kwargs['post_id']}").encode('utf-8')).hexdigest()
@@ -66,11 +67,20 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(post_id=self.kwargs['post_id'])
+        queryset =  self.queryset.filter(post_id=self.kwargs['post_id'])
+        if not queryset.exists():
+            raise Http404("No comments was found")
+        return queryset
 
     def create(self, request, post_id):
-        request.data['post'] = post_id
-        return super().create(request)
+        post = get_object_or_404(Post, pk=post_id)
+        data = request.data.copy()
+        data['post'] = post.pk
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=201)
+        return Response(data=serializer.errors, status=400)
     
 
 class CommentDeleteAPIView(DestroyAPIView):
