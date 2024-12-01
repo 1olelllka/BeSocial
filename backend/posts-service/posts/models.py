@@ -1,7 +1,7 @@
 from django.db import models
 
 class Post(models.Model):
-    user_id = models.IntegerField()
+    user_id = models.CharField()
     image = models.CharField(max_length=200)
     desc = models.TextField(null=True, blank=True)
     likes = models.IntegerField(default=0)
@@ -16,7 +16,7 @@ class Post(models.Model):
         verbose_name_plural = 'Posts'
 
 class Comment(models.Model):
-    user_id = models.IntegerField()
+    user_id = models.CharField()
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     text = models.TextField()
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
