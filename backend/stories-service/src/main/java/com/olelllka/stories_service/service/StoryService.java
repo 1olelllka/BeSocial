@@ -7,4 +7,12 @@ import org.springframework.data.domain.Pageable;
 
 public interface StoryService {
     Page<StoryEntity> getStoriesForUser(String id, Pageable pageable);
+
+    StoryEntity getSpecificStory(String storyId);
+
+    StoryEntity createStory(String userId, StoryEntity entity);
+
+    StoryEntity updateSpecificStory(String storyId, StoryEntity entity);
+
+    void deleteSpecificStory(String storyId);
 }

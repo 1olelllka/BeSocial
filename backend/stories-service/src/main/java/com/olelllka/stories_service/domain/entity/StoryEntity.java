@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.OffsetDateTime;
@@ -22,7 +22,10 @@ public class StoryEntity {
     private String id;
     private String image;
     private String userId;
-    private Integer likes;
+    @Builder.Default
+    private Integer likes = 0;
     private Boolean available;
-    private Date createdAt;
+    @Builder.Default
+    @Indexed(expireAfter = "10s")
+    private Date createdAt = new Date();
 }
