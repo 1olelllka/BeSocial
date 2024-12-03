@@ -26,6 +26,5 @@ public class StoryEntity {
     private Integer likes = 0;
     private Boolean available;
     @Builder.Default
-    @Indexed(expireAfter = "10s")
     private Date createdAt = new Date();
 }

@@ -11,6 +11,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.*;
 import org.testcontainers.containers.MongoDBContainer;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,6 +59,24 @@ public class StoryRepositoryMongoDataTest {
                 () -> assertNotNull(result),
                 () -> assertEquals(result.getContent().size(), 0)
         );
+    }
+
+    @Test
+    public void testThatMongoReturnsListOfExpiredStories() {
+        StoryEntity story = TestDataUtil.createStoryEntity();
+        story.setAvailable(true);
+        repository.save(story);
+        List<StoryEntity> stories = repository.findByAvailableTrueAndCreatedAtBefore(new Date());
+        assertEquals(stories.size(), 1);
+    }
+
+    @Test
+    public void testThatMongoReturnsEmptyListOfStories() {
+        StoryEntity story = TestDataUtil.createStoryEntity();
+        story.setAvailable(true);
+        repository.save(story);
+        List<StoryEntity> stories = repository.findByAvailableTrueAndCreatedAtBefore(Date.from(Instant.now().minus(24, ChronoUnit.HOURS)));
+        assertEquals(stories.size(), 0);
     }
 
 }
