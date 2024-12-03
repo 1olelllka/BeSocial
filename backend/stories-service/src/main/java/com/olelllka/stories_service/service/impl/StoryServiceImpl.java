@@ -1,6 +1,5 @@
 package com.olelllka.stories_service.service.impl;
 
-import com.mongodb.internal.operation.CreateCollectionOperation;
 import com.olelllka.stories_service.domain.entity.StoryEntity;
 import com.olelllka.stories_service.repository.StoryRepository;
 import com.olelllka.stories_service.rest.exception.NotFoundException;
